@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Generator App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('download.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #4F021B;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2); /* Glassy effect */
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .top-bar {
+            background: rgba(199, 71, 119, 0.8);
+            color: white;
+            padding: 10px;
+            font-size: 1.5em;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #C74777;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .genre-selection {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .genre-btn {
+            background: rgba(233, 141, 173, 0.8);
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            color: #4F021B;
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            flex: 1 1 150px;
+            transition: background 0.3s;
+        }
+
+        .genre-btn:hover {
+            background: rgba(199, 71, 119, 0.9);
+        }
+
+        .genre-btn.selected {
+            background: rgba(199, 71, 119, 0.8);
+        }
+
+        .submit-btn, .clear-btn, .back-btn {
+            background: rgba(122, 4, 42, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover, .clear-btn:hover, .back-btn:hover {
+            background: rgba(199, 71, 119, 0.9);
+        }
+
+        .recommendations {
+            margin-top: 30px;
+            text-align: left;
+            color: #4F021B;
+        }
+
+        .book {
+            background: rgba(233, 141, 173, 0.7);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .book:hover {
+            transform: scale(1.02);
+        }
+
+        .book img {
+            width: 80px;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .book-details-page {
+            display: none;
+            text-align: left;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.2); /* Glassy effect */
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-cover {
+            width: 150px;
+            height: auto;
+            border-radius: 4px;
+            margin-right: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 10px 0;
+            background: rgba(122, 4, 42, 0.8);
+            color: white;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            color: #4F021B;
+            font-size: 2em;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .spinner {
+            border: 8px solid #E98DAD;
+            border-top: 8px solid #C74777;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        .loader p {
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p>Generating Book Recommendations...</p>
+    </div>
+    <div class="container">
+        <div class="top-bar">Book Generator App</div>
+        <div id="explore-genres">
+            <div class="genre-selection">
+                <button class="genre-btn" onclick="selectGenre('Fantasy')">Fantasy</button>
+                <button class="genre-btn" onclick="selectGenre('Romance')">Romance</button>
+                <button class="genre-btn" onclick="selectGenre('Mystery')">Mystery</button>
+                <button class="genre-btn" onclick="selectGenre('Science Fiction')">Science Fiction</button>
+                <button class="genre-btn" onclick="selectGenre('Horror')">Horror</button>
+            </div>
+            <button class="submit-btn" onclick="generateRecommendations()">Generate Recommendations</button>
+            <button class="clear-btn" onclick="clearGenres()">Clear Genres</button>
+        </div>
+        <div id="recommendations" class="recommendations"></div>
+        <div id="book-details-page" class="book-details-page">
+            <button class="back-btn" onclick="goBack()">Back</button>
+            <div class="book-details-content"></div>
+        </div>
+    </div>
+    <div class="footer">© 2024 Book Generator App</div>
+    <script>
+        const selectedGenres = [];
+
+        function selectGenre(genre) {
+            const index = selectedGenres.indexOf(genre);
+            if (index > -1) {
+                selectedGenres.splice(index, 1);
+            } else {
+                selectedGenres.push(genre);
+            }
+            document.querySelectorAll('.genre-btn').forEach(btn => {
+                if (selectedGenres.includes(btn.textContent)) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        function clearGenres() {
+            selectedGenres.length = 0; 
+            document.querySelectorAll('.genre-btn').forEach(btn => {
+                btn.classList.remove('selected'); 
+            });
+            const recommendations = document.getElementById('recommendations');
+            recommendations.innerHTML = ''; 
+        }
+
+        async function generateRecommendations() {
+            const recommendations = document.getElementById('recommendations');
+            const loader = document.getElementById('loader');
+            recommendations.innerHTML = '';
+            loader.style.display = 'flex';  
+
+            // Simulating loading time
+            setTimeout(async () => {
+                try {
+                    for (const genre of selectedGenres) {
+                        const books = await fetchBooksByGenre(genre);
+                        if (books.length === 0) {
+                            recommendations.innerHTML += `<p>No books found for ${genre}.</p>`;
+                        }
+                        books.forEach(book => {
+                            const bookElement = document.createElement('div');
+                            bookElement.className = 'book';
+                            bookElement.innerHTML = `
+                                <img src="https://covers.openlibrary.org/b/id/${book.cover_id}-M.jpg" alt="${book.title} Cover">
+                                <div class="book-details">
+                                    <h3>${book.title}</h3>
+                                    <p>by ${book.author}</p>
+                                </div>
+                            `;
+                            bookElement.onclick = () => showBookDetails(book);
+                            recommendations.appendChild(bookElement);
+                        });
+                    }
+                } catch (error) {
+                    console.error(error);
+                    recommendations.innerHTML = '<p>Failed to load recommendations. Try again later.</p>';
+                }
+                loader.style.display = 'none'; 
+            }, 1500); 
+        }
+
+        async function fetchBooksByGenre(genre) {
+            const mockBooks = {
+                'Fantasy': [
+                    { title: 'The Hobbit', author: 'J.R.R. Tolkien', cover_id: '7126756' },
+                    { title: 'Harry Potter', author: 'J.K. Rowling', cover_id: '8378263' }
+                ],
+                'Romance': [
+                    { title: 'Pride and Prejudice', author: 'Jane Austen', cover_id: '7262176' }
+                ]
+            };
+            return mockBooks[genre] || [];
+        }
+
+        function showBookDetails(book) {
+            const bookDetailsPage = document.getElementById('book-details-page');
+            const content = bookDetailsPage.querySelector('.book-details-content');
+            content.innerHTML = `
+                <img src="https://covers.openlibrary.org/b/id/${book.cover_id}-L.jpg" alt="${book.title} Cover" class="book-cover">
+                <div>
+                    <h2>${book.title}</h2>
+                    <p><strong>Author:</strong> ${book.author}</p>
+                </div>
+            `;
+            bookDetailsPage.style.display = 'block';
+        }
+
+        function goBack() {
+            const bookDetailsPage = document.getElementById('book-details-page');
+            bookDetailsPage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
